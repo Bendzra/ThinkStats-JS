@@ -10,28 +10,29 @@ var fError = false;
 // ------------ Input Options ------------
 
 var filter2002FemPreg = {
-					"caseid"     : true,
-					"prglngth"   : true,
-					"outcome"    : true,
-					"pregordr"   : true,
-					"birthord"   : true,
-					"birthwgt_lb": true,
-					"birthwgt_oz": true,
-					"agepreg"    : true,
-					"finalwgt"   : true
+					"caseid"     : true,	// RESPONDENT ID NUMBER
+					"prglngth"   : true,	// DURATION OF COMPLETED PREGNANCY IN WEEKS
+					"outcome"    : true,	// PREGNANCY OUTCOME
+					"pregordr"   : true,	// PREGNANCY ORDER (NUMBER)
+					"birthord"   : true,	// BIRTH ORDER
+					"birthwgt_lb": true,	// BD-3 BIRTHWEIGHT IN POUNDS - 1ST BABY FROM THIS PREGNANCY
+					"birthwgt_oz": true,	// BD-3 BIRTHWEIGHT IN OUNCES - 1ST BABY FROM THIS PREGNANCY
+					"agepreg"    : true,	// AGE AT PREGNANCY OUTCOME
+					"finalwgt"   : true		// FINAL POST-STRATIFIED AND ADJUSTED WEIGHT
 				};
 
 var filter2002FemResp = {
-					"caseid"     : true,
-					"cmbirth"    : true,
-					"cmintvw"    : true,
-					"cmmarrhx"   : true,
-					"evrmarry"   : true,
-					"pregnum"    : true,
-					"totincr"    : true,
-					"age_r"      : true,
-					"numfmhh"    : true,
-					"parity"     : true
+					"caseid"     : true,	// RESPONDENT ID NUMBER
+					"pregnum"    : true,	// CAPI-BASED TOTAL NUMBER OF PREGNANCIES
+					"totincr"    : true,	// TOTAL INCOME OF R'S FAMILY
+					"age_r"      : true,	// R'S AGE AT INTERVIEW
+					"numfmhh"    : true,	// NUMBER OF FAMILY MEMBERS IN HOUSEHOLD
+					"parity"     : true,	// CAPI-BASED TOTAL # OF LIVE BIRTHS (ACCOUNTING FOR MULT BIRTH)
+					"numkdhh"    : true,	// NUMBER OF BIO/ADOPT/RELATED/LEGAL CHILDREN UNDER AGE 18 IN HOUSEHOLD
+					"cmbirth"    : true,	// CENTURY MONTH OF R'S BIRTH
+					"cmintvw"    : true,	// CENTURY MONTH OF INTERVIEW DATE
+					"cmmarrhx"   : true,	// CM FOR DATE OF 1ST MARRIAGE
+					"evrmarry"   : true		// WHETHER R WAS EVER MARRIED
 				};
 
 var useFilter = true;

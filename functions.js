@@ -121,3 +121,9 @@ function validateData(df, key, tests, L=7643)
 }
 
 ///////////////////////////////////////////////////////////
+
+function fixFloat(x, decimals=8)
+{
+	if(decimals === null) return x;
+	return parseFloat( x.toFixed(decimals) );
+}
