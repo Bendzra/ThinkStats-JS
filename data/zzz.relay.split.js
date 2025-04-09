@@ -1,4 +1,6 @@
-/*-- windows script host script --*/
+/*--
+	windows script host script
+--*/
 
 var sErrorMsg = "successfully!";
 var fError = false;
@@ -27,39 +29,37 @@ var fDat = fso.OpenTextFile(datFileName, ForReading, false);
 
 // ------
 
-function ConvertPaceToSpeed(pace)
+function trim(s)
 {
-    // Converts pace in MM:SS per mile to MPH
-
-    var ms = pace.split(":");
-    var secs = parseInt(ms[0], 10) * 60 + parseInt(ms[1], 10);
-    var mph  = 1 / secs * 60 * 60;
-    return mph;
+	return s.replace(/^\s+/, '').replace(/\s+$/, '');
 }
 
-function BinData(data, low, high, n)
+function isNumeric(str)
 {
-    // """Rounds data off into bins.
-
-    // data: sequence of numbers
-    // low: low value
-    // high: high value
-    // n: number of bins
-
-    // returns: sequence of numbers
-
-	for(var i = 0; i < data.length; i++)
-	{
-		var d = data[i];
-		d = (d - low) / (high - low) * n ;
-		d = Math.round(d);
-		data[i] = (d * (high - low) / n + low).toFixed(2) ;
-	}
-    return data;
+  if (typeof str != "string") return false; // we only process strings!
+  return !isNaN(str) && !isNaN(parseFloat(str));
 }
 
-var paces = [];
-var re = /^.{20}\s+(\d+\:[\d\:]*\d+)\s+(\d+\:[\d\:]*\d+)\*?\s+(\d+\:\d+)\s+/;
+var relay = {
+				"Place"      : {id: 1, type: "int", data:[], write: false},
+				"Div/Tot"    : {id: 2, type: "str", data:[], write: false},
+				"Div"	     : {id: 3, type: "str", data:[], write: false},
+				"Guntime"    : {id: 4, type: "str", data:[], write: false},
+				"Nettime"    : {id: 5, type: "str", data:[], write: false},
+				"Pace"       : {id: 6, type: "str", data:[], write: true },
+				"Name"       : {id: 7, type: "str", data:[], write: false},
+				"Ag"         : {id: 8, type: "int", data:[], write: false},
+				"S"          : {id: 9, type: "str", data:[], write: false},
+				"Race#"      : {id:10, type: "int", data:[], write: false},
+				"City/state" : {id:11, type: "str", data:[], write: false}
+			};
+
+
+// Place Div/Tot  Div   Guntime Nettime  Pace  Name                   Ag S Race# City/state
+// ===== ======== ===== ======= =======  ===== ====================== == = ===== =======================
+//     5        8     5       7       7      5                     22  2 1     5                      23
+
+var re = /^([ \d]{5}) ([ \d\/]{8}) ([ MF\d]{5}) ([\d\: ]{7}) ([\d\: ]{7})[\* ]{2}([\d\: ]{5}) (.{22}) ([ \d]{2}) ([ FM]) ([ \d]{5}) (.{23}) $/;
 
 var i = 0;
 
@@ -69,21 +69,33 @@ while (!fDat.AtEndOfStream)
 	var arr = re.exec(s);
 	if(arr)
 	{
-		// fLog.Write(arr[3] + ", ");
-		paces.push( ConvertPaceToSpeed(arr[3]) );
+		for(var key in relay)
+		{
+			if (relay[key].write)
+			{
+				var d = trim(arr[ relay[key].id ]);
+				if( relay[key].type == "str" || !isNumeric(d) ) d = '"' + d + '"';
+				relay[key].data.push(d);
+			}
+		}
 		i++;
-		
-	}
-	else
-	{
-		// fLog.WriteLine(s);
 	}
 }
 
-fLog.WriteLine("const " + dbname + " = [" );
-paces = BinData(paces, 3, 12, 100);
-fLog.WriteLine("\t" + paces);
-fLog.WriteLine("];" );
+fLog.WriteLine("const " + dbname + " = {" );
+
+var column = 0;
+for(var key in relay)
+{
+	if (relay[key].write)
+	{
+		if(column++ > 0) fLog.WriteLine(",");
+		fLog.Write("\t'" + key + "': [" + relay[key].data + "]");
+	}
+}
+if(column > 0) fLog.WriteLine("");
+
+fLog.WriteLine("};" );
 
 fDat.Close();
 fLog.Close();

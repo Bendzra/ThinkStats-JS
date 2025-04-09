@@ -147,8 +147,7 @@ for(var icol = 0; icol < starts.length; icol++)
 		}
 		
 		var d = s.substr(starts[icol], lens[icol]);
-		d = d.replace(/^\s+/, "");
-		d = d.replace(/\s+$/, "");
+		d = d.replace(/^\s+/, "").replace(/\s+$/, "");
 		if (d.length == 0) {
 			d = '""';
 		}

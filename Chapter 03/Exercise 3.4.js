@@ -13,13 +13,47 @@ function ObservedPmf(pmf, speed, label="")
 
 }
 
+function ConvertPaceToSpeed(pace)
+{
+    // Converts pace in MM:SS per mile to MPH
+
+    var ms = pace.split(":");
+    var secs = parseInt(ms[0], 10) * 60 + parseInt(ms[1], 10);
+    var mph  = 1 / secs * 60 * 60;
+    return mph;
+}
+
+function BinData(data, low, high, n)
+{
+    // """Rounds data off into bins.
+
+    // data: sequence of numbers
+    // low: low value
+    // high: high value
+    // n: number of bins
+
+    // returns: sequence of numbers
+
+	for(var i = 0; i < data.length; i++)
+	{
+		var d = data[i];
+		d = (d - low) * n / (high - low);
+		d = Math.round(d);
+		d = d * (high - low) / n + low;
+		data[i] = fixFloat(d, 2);
+	}
+    return data;
+}
+
 (function() {
 
 	const title = "Exercise 3.4";
 
 	console.log('\r\n< \x1B[1m' + title + '\x1B[m >');
 
-	const speeds = Apr25_27thAn_set1;
+	const speeds = Apr25_27thAn_set1.Pace.map( (pace) => { return ConvertPaceToSpeed(pace); });
+	BinData(speeds, 3, 12, 100);
+
 	const actual_pmf = new Pmf(speeds, 'actual');
 
 	const speed = 6.7;

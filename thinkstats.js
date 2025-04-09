@@ -28,8 +28,57 @@ class _DictWrapper
 
 		if(obj === null) return;
 
+
 		// treat obj like a list
-		// this.d.update(Counter(obj))
+
+		if ( obj.constructor === Array )
+		{
+			obj.forEach( (x) => this.Incr(x) );
+		}
+		else if (obj instanceof _DictWrapper)
+		{
+			for (const [val, prob] of obj.Items()) this.Set(val, prob);
+		}
+		else if (obj instanceof Map)
+		{
+			for (const [val, prob] of obj.entries()) this.Set(val, prob);
+		}
+		else if (obj instanceof Object)
+		{
+			for (const [val, prob] of Object.entries(obj)) this.Set(val, prob);
+		}
+		else
+		{
+			console.warn(`"${this.constructor.name}" constructor: Not implemented '${obj.constructor.name}' case!`);
+			return;
+		}
+	};
+
+	Set(x, y=0)
+	{
+		// Sets the freq/prob associated with the value x
+		//     x: number value
+		//     y: number freq or prob
+
+		this.d.set(x, y);
+	};
+
+	Get(x, deflt=undefined)
+	{
+		// Gets the freq/prob associated with the value x
+		// or deflt (if undefined)
+
+		return this.d.has(x) ? this.d.get(x) : deflt;
+	};
+
+	Incr(x, term=1)
+	{
+		// Increments the freq/prob associated with the value x
+
+		//     x: number value
+		//     term: how much to increment by
+
+		this.d.set(x, this.Get(x, 0) + term);
 	};
 
 	GetDict() { return this.d; };
@@ -63,92 +112,6 @@ class _DictWrapper
 		if( Object.hasOwn(this, 'title') ) aCopy.title = this.title;
 		this.d.forEach( (p, x) => aCopy.Set(x, p) );
 		return aCopy;
-	};
-
-	SortedItems(reverse=false)
-	{
-		// Gets a sorted Array of [value, freq/prob] pairs.
-		// If items are unsortable, the result is unsorted.
-
-		var fNaN  = false;
-		var items = [...this.d.entries()];
-
-		items.sort( (a, b) => {
-			if( !fNaN ) { if ( isNaN(a[0]) || isNaN(b[0]) ) fNaN = true; }
-			return ((reverse) ? b[0] - a[0] : a[0] - b[0]);
-		});
-
-		if( fNaN )
-		{
-			var msg = "Keys contain NaN, may not sort correctly.";
-			console.warn(`"${this.label}"`, msg);
-		}
-
-		return items;
-	};
-
-	ChartData(options={type:"line"}, skipNaN=true)
-	{
-		// Generates a chartData object tht contains
-		// a sequence of points suitable for plotting,
-		// the legend, etc.
-
-		var type = ("type" in options) ? options["type"] : "line";
-		var legendText = this.label;
-
-		const d = { type: type, showInLegend: false };
-
-		if (legendText)
-		{
-			d.showInLegend = true;
-			d.legendText = legendText;
-		}
-
-		const xy = [];
-		for( const [i, [x, y]] of this.SortedItems().entries() )
-		{
-			if( skipNaN && isNaN(x) ) continue;
-			xy.push({ "x": x, "y": y });
-		}
-		d.dataPoints = xy;
-
-		for (let key in options) if (options.hasOwnProperty(key)) d[key] = options[key];
-
-		return d;
-	};
-
-	Print()
-	{
-		// Prints the values and freqs/probs in ascending order
-
-		for( const [i, [v, p]] of this.SortedItems().entries() ) console.log(v, p);
-	};
-
-	Set(x, y=0)
-	{
-		// Sets the freq/prob associated with the value x
-		//     x: number value
-		//     y: number freq or prob
-
-		this.d.set(x, y);
-	};
-
-	Get(x, deflt=undefined)
-	{
-		// Gets the freq/prob associated with the value x
-		// or deflt (if undefined)
-
-		return this.d.has(x) ? this.d.get(x) : deflt;
-	};
-
-	Incr(x, term=1)
-	{
-		// Increments the freq/prob associated with the value x
-
-		//     x: number value
-		//     term: how much to increment by
-
-		this.d.set(x, this.Get(x, 0) + term);
 	};
 
 	Mult(x, factor)
@@ -186,6 +149,7 @@ class _DictWrapper
 	};
 }
 
+Object.assign(_DictWrapper.prototype, PlotMixin);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -239,28 +203,6 @@ class Pmf extends _DictWrapper
 
 		if (!values) return;
 
-		if ( values.constructor === Array )
-		{
-			values.forEach( (x) => this.Incr(x) );
-		}
-		else if (values instanceof _DictWrapper)
-		{
-			for (const [val, prob] of values.Items()) this.Set(val, prob);
-		}
-		else if (values instanceof Map)
-		{
-			for (const [val, prob] of values.entries()) this.Set(val, prob);
-		}
-		else if (values instanceof Object)
-		{
-			for (const [val, prob] of Object.entries(values)) this.Set(val, prob);
-		}
-		else
-		{
-			console.warn("pmf constructor: Not implemented 'values' case!");
-			return;
-		}
-
 		if(this.d.size === 0) return;
 		this.Normalize();
 	};
@@ -279,6 +221,8 @@ class Pmf extends _DictWrapper
 		}
 
 		var factor = fraction / total;
+		if (factor === 1) return total;
+
 		this.d.forEach( (prob, x) => this.d.set(x, prob * factor), this );
 
 		return total;

@@ -4,6 +4,75 @@
 
 //////////////////////////////////////////////////////////////////////
 
+const PlotMixin = {
+
+	SortedItems(reverse=false)
+	{
+		// Gets a sorted Array of [value, freq/prob] pairs.
+		// If items are unsortable, the result is unsorted.
+
+		var fNaN  = false;
+		var items = [...this.Items()];
+
+		// var it = [];
+		// items.forEach( (x) => { if( !isNaN(x[0]) ) it.push(x); });
+		// items = it;
+
+		items.sort( (a, b) => {
+			if( !fNaN ) { if ( isNaN(a[0]) || isNaN(b[0]) ) fNaN = true; }
+			return ((reverse) ? b[0] - a[0] : a[0] - b[0]);
+		});
+
+		if( fNaN )
+		{
+			var msg = "Keys contain NaN, may not sort correctly.";
+			console.warn(`"${this.label}"`, msg);
+		}
+
+		return items;
+	},
+
+	ChartData(options={type:"line"}, skipNaN=true)
+	{
+		// Generates a chartData object tht contains
+		// a sequence of points suitable for plotting,
+		// the legend, etc.
+
+		var type = ("type" in options) ? options["type"] : "line";
+		var legendText = this.label;
+
+		const d = { type: type, showInLegend: false };
+
+		if (legendText)
+		{
+			d.showInLegend = true;
+			d.legendText = legendText;
+		}
+
+		const xy = [];
+
+		this.SortedItems().forEach( ([x, y]) => {
+			if( skipNaN && isNaN(x) ) return;
+			xy.push({ "x": x, "y": y });
+		});
+		d.dataPoints = xy;
+
+		for (let key in options) if (options.hasOwnProperty(key)) d[key] = options[key];
+
+		return d;
+	},
+
+	Print()
+	{
+		// Prints the values and freqs/probs in ascending order
+
+		for( const [i, [v, p]] of this.SortedItems().entries() ) console.log(v, p);
+	}
+
+};
+
+//////////////////////////////////////////////////////////////////////
+
 function createDiv(prefix, titleSlug, className="info")
 {
 	var id = prefix + titleSlug;

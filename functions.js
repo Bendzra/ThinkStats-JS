@@ -64,7 +64,7 @@ function CleanFemPreg(df=nsfg_2002FemPreg)
 
 		if( na_vals.indexOf( df.birthwgt_oz.data[i] ) !== -1  ) df.birthwgt_oz.data[i] = NaN;
 
-		df.totalwgt_lb.data[i] = df.birthwgt_lb.data[i] + df.birthwgt_oz.data[i] / 16;
+		df.totalwgt_lb.data[i] = fixFloat(df.birthwgt_lb.data[i] + df.birthwgt_oz.data[i] / 16);
 	}
 }
 
@@ -126,4 +126,28 @@ function fixFloat(x, decimals=8)
 {
 	if(decimals === null) return x;
 	return parseFloat( x.toFixed(decimals) );
+}
+
+///////////////////////////////////////////////////////////
+
+function bisectLeft(arr, value, lo=0, hi=arr.length)
+{
+	while (lo < hi)
+	{
+		var mid = (lo + hi) >> 1;
+		if (arr[mid] < value) { lo = mid + 1; }
+		else { hi = mid; }
+	}
+	return lo;
+}
+
+function bisectRight(arr, value, lo=0, hi=arr.length)
+{
+	while (lo < hi)
+	{
+		var mid = (lo + hi) >> 1;
+		if (arr[mid] > value) { hi = mid; }
+		else { lo = mid + 1; }
+	}
+	return hi ;
 }
