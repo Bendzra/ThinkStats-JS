@@ -1,0 +1,123 @@
+<job id="defix">
+<script language="JScript" src="fixed.width.dicts.options.js"/>
+<script language="JScript">
+
+	// ------------ Input Options ------------ //
+
+	var db = _dict_brfss2008; // a dict from "fixed.width.dicts.options.js"
+
+	var filter = true;        // to use db.write "white list"
+
+	var currentDir = WScript.ScriptFullName;
+	currentDir = currentDir.substr(0, currentDir.lastIndexOf( "\\" ) + 1); // заканчивается на "\"
+
+	var datFileName = db.datFileName;
+	var logFileName = currentDir + db.logFileName;
+
+	var dbname = db.name;
+	var prefix = db.prefix;
+	var validate = db.validate;
+
+</script>
+<script language="JScript">
+
+	function isNumeric(str)
+	{
+	  if (typeof str != "string") return false; // we only process strings!
+	  return !isNaN(str) && !isNaN(parseFloat(str));
+	}
+
+	function isDataLine(s)
+	{
+		var r = true;
+		
+		if (!validate) return r;
+		
+		for(var col in db.columns)
+		{
+			var type = db.columns[col].type;
+			if (type.indexOf("str") == -1)
+			{
+				// должно быть числом
+				var start = db.columns[col].start - 1;
+				var len = ("width" in db.columns[col]) ? db.columns[col].width : db.columns[col].end - start;
+				if(start + len > s.length) { r = false; break; }
+				var d = s.substr(start, len);
+				if( isNaN(d) ) { r = false; break; }
+			}
+		}
+		return r;
+	}
+
+</script>
+<script language="JScript">
+
+	var sErrorMsg = "successfully!";
+	var fError = false;
+
+	// ------------ collecting columns from the data file ------------ //
+
+	var ForReading = 1, ForWriting = 2, ForAppending = 8;
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+
+	var fLog = fso.OpenTextFile(logFileName, ForWriting, true);
+	var fDat = fso.OpenTextFile(datFileName, ForReading, false);
+
+	fLog.WriteLine("const " + prefix + dbname + " = {");
+
+	var arrLines = [];
+	var i = 0;
+
+	for(var col in db.columns)
+	{
+		if(filter)
+		{
+			if( !(col in db.write) ) continue;
+			else if (!db.write[col]) continue;
+		}
+
+		fLog.Close();
+		fDat.Close();
+
+		fLog = fso.OpenTextFile(logFileName, ForAppending, false);
+		fDat = fso.OpenTextFile(datFileName, ForReading, false);
+
+		var column = [];
+		var name = col;
+		var type = db.columns[col].type;
+		var isStr = (type.indexOf("str") != -1);
+		var iLine = -1;
+
+		while (!fDat.AtEndOfStream)
+		{
+			iLine++;
+			var s = fDat.ReadLine();
+
+			if ( i == 0 ) arrLines[iLine] = isDataLine(s);
+			if(!arrLines[iLine]) continue;
+
+			var start = db.columns[col].start - 1;
+			var len = ("width" in db.columns[col]) ? db.columns[col].width : db.columns[col].end - start;
+
+			var d = s.substr(start, len);
+			d = d.replace(/^\s+/, "").replace(/\s+$/, "");
+
+			if( isStr || !isNumeric(d) ) d = '"' + d + '"';
+			else d = parseFloat(d);
+
+			column.push(d);
+		}
+		fLog.WriteLine( "\t\'" + name + "': {type: \""+ type + "\", data: [" + column + "]},") ;
+		i++;
+
+	}
+
+	fLog.WriteLine("};");
+
+	fLog.Close();
+	fDat.Close();
+
+	WScript.Echo("Done! " + i + ": " + sErrorMsg);
+
+</script>
+</job>
