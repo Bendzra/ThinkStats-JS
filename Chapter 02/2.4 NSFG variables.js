@@ -1,7 +1,5 @@
 // 2.4 NSFG variables
 
-CleanFemPreg();
-
 (function() {
 
 	const title = "2.4 NSFG variables";

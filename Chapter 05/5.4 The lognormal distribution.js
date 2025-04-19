@@ -72,7 +72,6 @@
 
 })();
 
-CleanBrfssFrame(cdc_brfss2008);
 
 (function() {
 

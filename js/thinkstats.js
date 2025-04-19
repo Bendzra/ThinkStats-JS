@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // This file contains class definitions for:
+//
 // _DictWrapper: "private" parent class for Hist and Pmf.
 // Hist: represents a histogram (map from values to integer frequencies).
 // Pmf: represents a probability mass function (map from values to probs).
@@ -7,6 +8,21 @@
 // Cdf: represents a discrete cumulative distribution function
 // Pdf: represents a continuous probability density function
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+class UnimplementedMethodError extends Error
+{
+	// Exception if someone calls a method that should be overridden
+
+	constructor(message)
+	{
+		super(message);
+		this.name = "NotImplementedError";
+	};
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 
 class _DictWrapper
@@ -344,13 +360,13 @@ class Cdf
 				this.ConstructFromItems( hist.Items() );
 			}
 		}
-		else if (obj instanceof _DictWrapper)
+		else if (obj instanceof _DictWrapper || obj instanceof Pdf)
 		{
 			this.ConstructFromItems( obj.Items() );
 		}
 		else
 		{
-			throw new RangeError("Cdf constructor: not implemented");
+			throw new UnimplementedMethodError("Cdf constructor: not implemented");
 		}
 	};
 
@@ -534,4 +550,6 @@ class Cdf
 
 Object.assign(Cdf.prototype, PlotMixin);
 
+
 ///////////////////////////////////////////////////////////////////////////////
+

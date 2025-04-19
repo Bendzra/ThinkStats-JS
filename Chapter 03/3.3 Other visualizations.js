@@ -1,7 +1,5 @@
 // 3.3 Other visualizations
 
-CleanFemPreg();
-
 (function() {
 
 	const title = "3.3 Other visualizations";

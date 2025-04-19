@@ -12,12 +12,12 @@
 	var firsts = {totalwgt_lb:[]};
 	var others = {totalwgt_lb:[]};
 
-	preg.totalwgt_lb.data.forEach( (weeks, i) => {
+	preg.totalwgt_lb.data.forEach( (lbs, i) => {
 		if(preg.outcome.data[i] === 1)
 		{
-			live.totalwgt_lb.push(weeks);
-			if (preg.birthord.data[i] === 1) firsts.totalwgt_lb.push(weeks);
-			else others.totalwgt_lb.push(weeks);
+			live.totalwgt_lb.push(lbs);
+			if (preg.birthord.data[i] === 1) firsts.totalwgt_lb.push(lbs);
+			else others.totalwgt_lb.push(lbs);
 		}
 	});
 

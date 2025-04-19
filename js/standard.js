@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///
-///  Some analytic distributions
+///  Some analytic distributions and functions
 ///
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -167,11 +167,18 @@ class exponential extends make
 
 	static straightenCdf(x, p)
 	{
+		// f = m * t + h
+
 		// CDF(x) = 1 - exp(-λ*x)
-		// =>
 		// ln( 1 - CDF(x) ) = -λ*x;
 
-		return [x, Math.log(1-p)];
+		const f = Math.log(1 - p);
+		const t = x;
+
+		// m = -λ
+		// h = 0
+
+		return [t, f];
 	};
 }
 
@@ -361,11 +368,18 @@ class gauss extends make
 
 	static straightenCdf(x, p, ver=0)
 	{
-		// CDF(x) = 0.5[ 1 + erf( (x-µ)/(σ*sqrt(2)) ) ]
-		// =>
-		// inverf( 2*CDF(x) - 1 ) = ( x - µ ) / (σ*sqrt(2))
+		// f = m * t + h
 
-		return [x, this.inverf(2*p - 1, ver)];
+		// CDF(x) = 0.5[ 1 + erf( (x-µ)/(σ*sqrt(2)) ) ]
+		// inverf( 2*CDF(x) - 1 ) = x / (σ*sqrt(2)) - µ / (σ*sqrt(2))
+
+		const f = this.inverf(2*p - 1, ver);
+		const t = x;
+
+		// m =   1 / (σ*sqrt(2))
+		// h = - µ / (σ*sqrt(2))
+
+		return [t, f];
 	};
 }
 
@@ -420,11 +434,18 @@ class pareto extends make
 
 	static straightenCdf(x, p)
 	{
+		// f = m * t + h
+
 		// CDF(x) = 1 - pow(xmin/x, α)
-		// =>
 		// ln( 1 - CDF(x) ) = -α * ( ln(x) - ln(xmin) )
 
-		return [Math.log(x), Math.log(1-p)];
+		const f = Math.log(1 - p);
+		const t = Math.log(x);
+
+		// m = -α
+		// h =  α * ln(xmin)
+
+		return [t, f];
 	};
 }
 
@@ -475,11 +496,18 @@ class weibull extends make
 
 	static straightenCdf(x, p)
 	{
+		// f = m * t + h
+
 		// CDF(x) = 1 - exp( -pow(x/λ, k) );
-		// =>
 		// ln(-ln(1-CDF(x))) = k * ln(x) - k * ln(λ)
 
-		return [Math.log(x), Math.log(-Math.log(1-p))];
+		const f = Math.log(-Math.log(1 - p));
+		const t = Math.log(x);
+
+		// m =  k
+		// h = -k * ln(λ)
+
+		return [t, f];
 	};
 }
 
@@ -529,11 +557,18 @@ class uniform extends make
 
 	static straightenCdf(x, p)
 	{
-		// CDF(x) = (x-a) / (b-a)
-		// =>
-		// CDF(x) = (x-a) / (b-a)
+		// f = m * t + h
 
-		return [x, p];
+		// CDF(x) = (x-a) / (b-a)
+		// CDF(x) = x / (b-a) - a / (b-a)
+
+		const f = p;
+		const t = x;
+
+		// m =  1 / (b-a)
+		// h = -a / (b-a)
+
+		return [t, f];
 	};
 
 }
@@ -604,15 +639,32 @@ class triangular extends make
 
 	static straightenCdf(x, p, params=[0, 100, 50])
 	{
-		const [a, b, c] = params;
+		// f = m * t + h
+
+		const [a, b, c] = params; // a < c < b
 
 		// TODO: x ∼ sqrt(p) : -sqrt(1-p) . Depends on params
 
-		const F = (c-a) / (b-a); // x = c, y = F
+		var f, t;
 
-		const y = (x < c) ? Math.sqrt(p) : Math.sqrt(1-p);
+		if (x <= c)
+		{
+			// m =  1 / sqrt( (b-a) * (c-a) )
+			// h = -a / sqrt( (b-a) * (c-a) )
 
-		return [x, y];
+			f = Math.sqrt(p);
+			t = x;
+		}
+		else
+		{
+			// m = -1 / sqrt( (b-a) * (b-c) )
+			// h =  b / sqrt( (b-a) * (b-c) )
+
+			f = Math.sqrt(1 - p);
+			t = x;
+		}
+
+		return [t, f];
 	};
 }
 
@@ -674,9 +726,17 @@ class gumbel extends make
 
 	static straightenCdf(x, p)
 	{
-		// x ∼ log(-log(CDF));
+		// f = m * t + h
 
-		return [x, Math.log(-Math.log(p))];
+		// log(-log(CDF)) = - (x - μ) / β;
+
+		const f = Math.log(-Math.log(p));
+		const t = x;
+
+		// m = -1 / β
+		// h =  μ / β
+
+		return [t, f];
 	};
 }
 
@@ -703,4 +763,80 @@ class graph
 		});
 		return hist;
 	};
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class statistic
+{
+	static RawMoment(xs, k)
+	{
+		// Computes the kth raw moment of xs
+
+		return xs.reduce( (sum, x) => sum + Math.pow(x, k), 0) / xs.length;
+	};
+
+	static CentralMoment(xs, k)
+	{
+		// Computes the kth central moment of xs
+
+		const mean = this.RawMoment(xs, 1);
+		return xs.reduce( (sum, x) => sum + Math.pow(x - mean, k), 0) / xs.length;
+	};
+
+	static StandardizedMoment(xs, k)
+	{
+		// Computes the kth standardized moment of xs
+
+		const variance = this.CentralMoment(xs, 2);
+		const std = Math.sqrt(variance);
+		return this.CentralMoment(xs, k) / Math.pow(std, k);
+	};
+
+
+	static Skewness(xs)
+	{
+		// Computes skewness
+
+		return this.StandardizedMoment(xs, 3);
+	};
+
+
+	static Median(xs)
+	{
+		// Computes the median (50th percentile) of a sequence.
+
+		// xs: sequence or anything else that can initialize a Cdf
+
+		// returns: float
+
+		const cdf = new Cdf(xs);
+		return cdf.Value(0.5);
+	};
+
+	static IQR(xs)
+	{
+		// Computes the interquartile of a sequence
+
+		// xs: sequence or anything else that can initialize a Cdf
+
+		// returns: pair of floats
+
+		const cdf = new Cdf(xs);
+		return [cdf.Value(0.25), cdf.Value(0.75)];
+	};
+
+	static PearsonMedianSkewness(xs)
+	{
+		// Computes the Pearson median skewness
+
+		const median = this.Median(xs);
+		const mean = this.RawMoment(xs, 1);
+		const variance = this.CentralMoment(xs, 2);
+		const std = Math.sqrt(variance);
+		const gp = 3 * (mean - median) / std;
+		return gp;
+	};
+
 }

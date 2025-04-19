@@ -182,3 +182,32 @@ function renderPlot(title, plotData, divPrefix="chart_", axes={}, dim={height:37
 	});
 	chart.render();
 }
+
+
+//////////////////////////////////////////////////////////////////////
+
+function addVericals(plotData, verticals)
+{
+	var [ymin, ymax] = [Infinity, -Infinity];
+
+	plotData.forEach( (pd) => {
+		pd.dataPoints.forEach( (point) => {
+			if(ymin > point.y) ymin = point.y;
+			if(ymax < point.y) ymax = point.y;
+		});
+	});
+
+	verticals.forEach( (v) => {
+		var label = Object.keys(v)[0];
+		var x = v[label];
+		var d = {
+			type: "line",
+			markerSize: 0,
+			showInLegend: true,
+			legendText: label,
+			dataPoints: [{"x": x, "y": ymin}, {"x": x, "y": ymax}]
+		}
+		plotData.push(d);
+	});
+	return plotData;
+}
