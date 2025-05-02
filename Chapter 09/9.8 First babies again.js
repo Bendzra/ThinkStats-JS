@@ -48,28 +48,12 @@
 			const stat = observed.reduce( (sum, _, i) => sum += (observed[i] - expected[i])**2 / expected[i], 0);
 			return stat;
 		}
-
 	}
 
 
 	/////////////////////////////////////////////
 
-	const db = nsfg_2002FemPreg;
-
-	const LIVE_BIRTHS = ( (i) => db.outcome.data[i] === 1 );
-	const subset = ['birthord', 'prglngth'];
-	const df = dropna( db, subset, LIVE_BIRTHS, false );
-
-	const firsts = {prglngth:[]};
-	const others = {prglngth:[]};
-
-	df.birthord.forEach( (o, i) => {
-		const ord = ((o === 1) ? firsts : others);
-		ord.prglngth.push( df.prglngth[i] );
-	});
-
-
-	/////////////////////////////////////////////
+	const [live, firsts, others] = liveFirstsOthers();
 
 	var data = [firsts.prglngth, others.prglngth];
 	var ht = new PregLengthTest( data );

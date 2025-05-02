@@ -2,9 +2,10 @@
 
 ///////////////////////////////////////////////////////////
 
+const ___nsfg_2002FemPreg = {};
 
-function CleanFemPreg(df=nsfg_2002FemPreg)
-{
+___nsfg_2002FemPreg.CleanFemPreg = function(df=nsfg_2002FemPreg) {
+
 	const NOT_ASCERTAINED = 97, REFUSED = 98, DO_NOT_KNOW = 99, EMPTY = "";
 	const na_vals = [NOT_ASCERTAINED, REFUSED, DO_NOT_KNOW, EMPTY];
 
@@ -25,7 +26,7 @@ function CleanFemPreg(df=nsfg_2002FemPreg)
 
 		df.totalwgt_lb.data[i] = fixFloat(df.birthwgt_lb.data[i] + df.birthwgt_oz.data[i] / 16);
 	}
-}
+};
 
 function MakePregMap(df=nsfg_2002FemPreg)
 {
@@ -38,6 +39,29 @@ function MakePregMap(df=nsfg_2002FemPreg)
 		d[caseid].push(preg_index);
 	}
 	return d;
+}
+
+function liveFirstsOthers(db=nsfg_2002FemPreg, subset=['totalwgt_lb', 'prglngth', 'agepreg'], skipNaN=false)
+{
+	const LIVE_BIRTHS = ( (i) => db.outcome.data[i] === 1 );
+	const df = dropna( db, ['birthord', ...subset], LIVE_BIRTHS , skipNaN);
+
+	const live   = {};
+	const firsts = {};
+	const others = {};
+
+	subset.forEach((prop) => { live[prop] = []; firsts[prop] = []; others[prop] = []; });
+
+	df.birthord.forEach( (o, i) => {
+		const ord = (o === 1) ? firsts : others;
+		subset.forEach( (prop) => {
+			const v = df[prop][i];
+			ord [prop].push( v );
+			live[prop].push( v );
+		});
+	});
+
+	return [live, firsts, others];
 }
 
 
@@ -57,6 +81,6 @@ const nsfg_2002FemPreg = {
 
 ///////////////////////////////////////////////////////////
 
-CleanFemPreg();
+___nsfg_2002FemPreg.CleanFemPreg();
 
 ///////////////////////////////////////////////////////////

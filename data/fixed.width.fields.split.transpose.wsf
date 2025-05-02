@@ -4,7 +4,7 @@
 
 	// ------------ Input Options ------------ //
 
-	var db = _dict_brfss2008; // a dict from "fixed.width.dicts.options.js"
+	var db = _dict_2006_2010_FemPreg; // a dict from "fixed.width.dicts.options.js"
 
 	var filter = true;        // to use db.write "white list"
 

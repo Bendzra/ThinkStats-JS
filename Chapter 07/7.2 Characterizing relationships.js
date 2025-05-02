@@ -2,44 +2,6 @@
 
 // 7.2 Characterizing relationships
 
-function digitizeIndices(arr, low, high, step)
-{
-	const nBins = 1 + Math.floor( fixFloat((high - low) / step) ) + 1;
-
-	// indices: arr index ==> bin index
-
-	const indices = new Array(arr.length);
-
-	arr.forEach( (v, index) => {
-
-		let ibin = NaN;
-
-		if      (v  <  low) ibin = 0;
-		else if (v >= high) ibin = nBins - 1;
-		else ibin = 1 + Math.floor( fixFloat((v - low) / step) );
-
-		indices[index] = ibin;
-	});
-
-	return indices;
-}
-
-
-function groupby(df, indices)
-{
-	const groups = {};
-	for(const name in df) groups[name] = [];
-
-	indices.forEach( (ibin, i) => {
-		for(const name in df)
-		{
-			if(!groups[name][ibin]) groups[name][ibin] = [];
-			groups[name][ibin].push(df[name][i]);
-		}
-	});
-
-	return groups;
-}
 
 (function() {
 
@@ -59,8 +21,8 @@ function groupby(df, indices)
 	// heights ranged (in bins):
 
 	const low   = 135,
-	      high  = 210,
-	      step  = 5;
+		  high  = 210,
+		  step  = 5;
 
 	const indices = digitizeIndices(df.htm3, low, high, step);
 

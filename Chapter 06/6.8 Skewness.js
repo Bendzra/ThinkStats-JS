@@ -26,7 +26,7 @@
 		}
 	});
 
-	var data = live.totalwgt_lb.reduce( (arr, x) => {if( !isNaN(x) ) arr.push(x); return arr;}, []);
+	var data = live.totalwgt_lb.filter( (x) => !isNaN(x) );
 	var pdf = new EstimatedPdf(data, 'birth weight');
 
 	var plotData = [];
@@ -57,7 +57,7 @@
 
 	var df = cdc_brfss2008;
 
-	var data = df.wtkg2.data.reduce( (arr, x) => {if( !isNaN(x) ) arr.push(x); return arr;}, []);
+	var data = df.wtkg2.data.filter( (x) => !isNaN(x) );
 	var pdf = new EstimatedPdf(data, 'adult weight');
 
 	var plotData = [];

@@ -397,9 +397,11 @@ class Cdf
 
 	Items()
 	{
-		// Returns a sorted array of [value, probability] pairs.
-		var items = this.xs.map( (x, i) => {return [x, this.ps[i]];}, this );
-		items.sort( (a, b) => {return a[0] - b[0];} );
+		// Returns a sorted array of [value, probability] pairs
+
+		const items = this.xs.map( (x, i) => [x, this.ps[i]], this );
+		items.sort( (a, b) => a[0] - b[0] );
+
 		return items;
 	};
 
@@ -621,3 +623,87 @@ class Pdf
 
 Object.assign(Pdf.prototype, PlotMixin);
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+class HypothesisTest
+{
+	// Represents a hypothesis test
+
+	constructor(data)
+	{
+		// data: data in whatever form is relevant
+
+		this.data = data;
+		this.MakeModel();
+		this.actual = this.TestStatistic(data);
+		this.test_stats = null;
+		this.test_cdf = null;
+	}
+
+	PValue(iters=1000)
+	{
+		// Computes the distribution of the test statistic and p-value.
+
+		// iters: number of iterations
+
+		// returns: float p-value
+
+		this.test_stats = Array.from({length: iters}, (_) => this.TestStatistic(this.RunModel()));
+		this.test_cdf = new Cdf(this.test_stats);
+		const a = this.actual;
+		const count = this.test_stats.reduce( (sum, x) => {
+			if ( x >= a ) sum++;
+			return sum;
+		}, 0);
+
+		return count / iters;
+	}
+
+	MaxTestStat()
+	{
+		// Returns the largest test statistic seen during simulations
+
+		const [min, max] = this.test_stats.minmax();
+
+		return max;
+	}
+
+    ChartData(label="")
+    {
+        // Draws a Cdf with vertical lines at the observed test stat
+
+		const plotData = [];
+		this.test_cdf.label = label;
+		plotData.push(this.test_cdf.ChartData({type:"line"}));
+		addVericals( plotData, [{"actual": this.actual}] );
+		return plotData;
+    }
+
+	TestStatistic(data)
+	{
+		// Computes the test statistic.
+
+		// data: data in whatever form is relevant
+
+		throw new UnimplementedMethodError();
+	}
+
+	MakeModel()
+	{
+		// Build a model of the null hypothesis
+
+		// pass;
+
+	}
+
+	RunModel()
+	{
+		// Run the model of the null hypothesis.
+
+		// returns: simulated data
+
+		throw new UnimplementedMethodError();
+	}
+
+}

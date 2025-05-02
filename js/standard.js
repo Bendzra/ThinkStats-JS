@@ -757,12 +757,13 @@ class graph
 		if (!("high"    in range)) range.high    = false;
 		if (!("decimal" in range)) range.decimal = 8;
 
-		const xs = (range.xs===null) ? spreadDots(null, range.nDots, range.low, range.high, range.decimal) : range.xs;
-		var hist = new Hist(null, label);
-		xs.forEach( (x, i) => {
-			var y = m * x + b;
-			hist.Set(x, y);
-		});
+		const xs = (range.xs===null) ?
+			spreadDots(null, range.nDots, range.low, range.high, range.decimal) :
+			range.xs.slice().sort( (a,b) => a-b );
+
+		const hist = new Hist(null, label);
+		xs.forEach( (x) => hist.Set(x, m * x + b) );
+
 		return hist;
 	};
 }
@@ -875,7 +876,7 @@ class statistic
 
 	static Corr(xs, ys, meanx=NaN, varx=NaN, meany=NaN, vary=NaN, ddof=0)
 	{
-		// Computes Corr(X, Y)
+		// Computes Corr(X, Y) = Pearson’s correlation
 
 		//     xs: sequence of values
 		//     ys: sequence of values

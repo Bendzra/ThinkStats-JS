@@ -13,15 +13,12 @@ const PlotMixin = {
 		// Gets a sorted Array of [value, freq/prob] pairs.
 		// If items are unsortable, the result is unsorted.
 
-		var fNaN  = false;
-		var items = [...this.Items()];
+		let fNaN  = false;
+		let items = [...this.Items()];
 
 		if(skipNaNs)
 		{
-			items = items.reduce( (arr, [x,y]) => {
-				if( !(isNaN(x) || isNaN(y)) ) arr.push([x,y]);
-				return arr;
-			}, []);
+			items = items.filter( ([x,y]) => !isNaN(x) && !isNaN(y) );
 		}
 
 		items.sort( (a, b) => {
@@ -31,7 +28,7 @@ const PlotMixin = {
 
 		if( fNaN )
 		{
-			var msg = "Keys contain NaN, may not sort correctly.";
+			const msg = "Keys contain NaN, may not sort correctly.";
 			console.warn(`"${this.label}"`, msg);
 		}
 
@@ -68,11 +65,11 @@ const PlotMixin = {
 		return d;
 	},
 
-	Print()
+	Print(skipNaNs=true, reverse=false)
 	{
 		// Prints the values and freqs/probs in ascending order
 
-		for( const [i, [v, p]] of this.SortedItems().entries() ) console.log(v, p);
+		for( const [i, [v, p]] of this.SortedItems(skipNaNs, reverse).entries() ) console.log(v, p);
 	}
 
 };
@@ -195,7 +192,7 @@ function renderPlot(title, plotData, divPrefix="chart_", axes={}, dim={height:37
 
 function addVericals(plotData, verticals)
 {
-	var [ymin, ymax] = [Infinity, -Infinity];
+	let [ymin, ymax] = [Infinity, -Infinity];
 
 	plotData.forEach( (pd) => {
 		pd.dataPoints.forEach( (point) => {
@@ -205,9 +202,9 @@ function addVericals(plotData, verticals)
 	});
 
 	verticals.forEach( (v) => {
-		var label = Object.keys(v)[0];
-		var x = v[label];
-		var d = {
+		let label = Object.keys(v)[0];
+		let x = v[label];
+		let d = {
 			type: "line",
 			markerSize: 0,
 			showInLegend: true,
@@ -216,5 +213,6 @@ function addVericals(plotData, verticals)
 		}
 		plotData.push(d);
 	});
+
 	return plotData;
 }

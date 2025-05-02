@@ -39,23 +39,8 @@
 
 	/////////////////////////////////////////////
 
-	const db = nsfg_2002FemPreg;
+	const [live, firsts, others] = liveFirstsOthers();
 
-	const LIVE_BIRTHS = ( (i) => db.outcome.data[i] === 1 );
-	const subset = ['birthord', 'totalwgt_lb', 'prglngth'];
-	const df = dropna( db, subset, LIVE_BIRTHS, false );
-
-	const firsts = {totalwgt_lb:[],prglngth:[]};
-	const others = {totalwgt_lb:[],prglngth:[]};
-
-	df.birthord.forEach( (o, i) => {
-		const ord = ((o === 1) ? firsts : others);
-		ord.totalwgt_lb.push( df.totalwgt_lb[i] );
-		ord.prglngth.push( df.prglngth[i] );
-	});
-
-
-	/////////////////////////////////////////////
 
 	/// DiffMeansOneSided
 

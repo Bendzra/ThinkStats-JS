@@ -118,5 +118,42 @@ function bisectRight(arr, value, lo=0, hi=arr.length)
 		if (arr[mid] > value) { hi = mid; }
 		else { lo = mid + 1; }
 	}
-	return hi ;
+	return hi;
+}
+
+
+///////////////////////////////////////////////////////////
+
+function columnQuicksort(A, fst, lst, iCol)
+{
+	// Sorting a column of 2D array (all other elements stay where they are)
+
+	if (fst >= lst) return;
+
+	let [t, b] = [fst, lst];
+	const barrier = A[fst + Math.floor( Math.random() * (lst - fst) )][iCol];
+
+	while (t <= b)
+	{
+		while (A[t][iCol] < barrier) t += 1;
+		while (A[b][iCol] > barrier) b -= 1;
+		if (t <= b)
+		{
+			[A[t][iCol], A[b][iCol]] = [A[b][iCol], A[t][iCol]];
+			[t, b] = [t + 1, b - 1];
+		}
+	}
+	columnQuicksort(A, fst, b, iCol);
+	columnQuicksort(A, t, lst, iCol);
+}
+
+function columnHoarSort(A)
+{
+	// Sorting columns of 2D array
+
+	for(let iCol = 0; iCol < A[0].length; iCol++)
+	{
+		columnQuicksort(A, 0, A.length-1, iCol);
+	}
+	return A;
 }

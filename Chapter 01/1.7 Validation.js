@@ -9,6 +9,8 @@
 
 	printTitle(title);
 
+	/////////////////////////////////////////////
+
 	const df = nsfg_2002FemPreg;
 
 	const TOTAL = 13593;
