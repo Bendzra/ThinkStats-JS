@@ -916,3 +916,285 @@ class statistic
 		return this.Corr(xranks, yranks, ddof);
 	};
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class matrix
+{
+	static invert(M)
+	{
+		// Returns the inverse of matrix `M`.
+
+		// I use Guassian Elimination to calculate the inverse:
+		// (1) 'augment' the matrix (left) by the identity (on the right)
+		// (2) Turn the matrix on the left into the identity by elemetry row ops
+		// (3) The matrix on the right is the inverse (was the identity matrix)
+
+		// There are 3 elemtary row ops: (I combine b and c in my code)
+		// (a) Swap 2 rows
+		// (b) Multiply a row by a scalar
+		// (c) Add 2 rows
+
+		//if the matrix isn't square: exit (error)
+		if(M.length !== M[0].length) throw new RangeError(`the matrix isn't square: ${M.length} != ${M[0].length}`);
+
+		//create the identity matrix (I), and a copy (C) of the original
+		const dim = M.length;
+		const I = [], C = [];
+
+		let i = 0, ii = 0, j = 0, e = 0, t = 0;
+
+		for(i = 0; i < dim; i++)
+		{
+			// Create the row
+			I[I.length] = [];
+			C[C.length] = [];
+			for(j = 0; j < dim; j++)
+			{
+				//if we're on the diagonal, put a 1 (for identity)
+				I[i][j] = (i === j) ? 1 : 0;
+
+				// Also, make the copy of the original
+				C[i][j] = M[i][j];
+			}
+		}
+
+		// Perform elementary row operations
+		for(i = 0; i < dim; i++)
+		{
+			// get the element e on the diagonal
+			e = C[i][i];
+
+			// if we have a 0 on the diagonal (we'll need to swap with a lower row)
+			if(e === 0)
+			{
+				// look through every row below the i'th row
+				for(ii = i+1; ii < dim; ii++)
+				{
+					// if the ii'th row has a non-0 in the i'th col
+					if(C[ii][i] !== 0)
+					{
+						//it would make the diagonal have a non-0 so swap it
+						for(j = 0; j < dim; j++)
+						{
+							e = C[i][j];       // temp store i'th row
+							C[i][j] = C[ii][j];// replace i'th row by ii'th
+							C[ii][j] = e;      // repace ii'th by temp
+							e = I[i][j];       // temp store i'th row
+							I[i][j] = I[ii][j];// replace i'th row by ii'th
+							I[ii][j] = e;      // repace ii'th by temp
+						}
+						// don't bother checking other rows since we've swapped
+						break;
+					}
+				}
+				// get the new diagonal
+				e = C[i][i];
+
+				// if it's still 0, not invertable (error)
+				if(e === 0)
+				{
+					console.warn("error: not invertable");
+					return;
+				}
+			}
+
+			// Scale this row down by e (so we have a 1 on the diagonal)
+			for(j = 0; j < dim; j++)
+			{
+				C[i][j] = C[i][j] / e; //apply to original matrix
+				I[i][j] = I[i][j] / e; //apply to identity
+			}
+
+			// Subtract this row (scaled appropriately for each row) from ALL of
+			// the other rows so that there will be 0's in this column in the
+			// rows above and below this one
+			for(ii = 0; ii < dim; ii++)
+			{
+				// Only apply to other rows (we want a 1 on the diagonal)
+				if(ii === i) continue;
+
+				// We want to change this element to 0
+				e = C[ii][i];
+
+				// Subtract (the row above(or below) scaled by e) from (the current row)
+				// but start at the i'th column and assume all the stuff left of
+				// diagonal is 0 (which it should be if we made this algorithm correctly)
+				for(j = 0; j < dim; j++)
+				{
+					C[ii][j] -= e*C[i][j]; // apply to original matrix
+					I[ii][j] -= e*I[i][j]; // apply to identity
+				}
+			}
+		}
+
+		// we've done all operations, 'C' should be the identity matrix, 'I' should be the inverse:
+		return I;
+	};
+
+
+	static add(A, B)
+	{
+		// M = A + B
+
+		const aRows = A.length,
+			  aCols = A[0].length,
+			  bRows = B.length,
+			  bCols = B[0].length;
+
+		if (aCols !== bCols || aRows !== bRows) throw new RangeError(`size mismatch: ${aRows}x${aCols} != ${bRows}x${bCols}`);
+
+		const M = new Array(aRows);
+		for (let r = 0; r < aRows; ++r)
+		{
+			M[r] = new Array(bCols);
+			for (let c = 0; c < bCols; ++c)
+			{
+				M[r][c] = A[r][c] + B[r][c];
+			}
+		}
+		return M;
+	};
+
+	static subtract(A, B)
+	{
+		// M = A - B
+
+		const aRows = A.length,
+			  aCols = A[0].length,
+			  bRows = B.length,
+			  bCols = B[0].length;
+
+		if (aCols !== bCols || aRows !== bRows) throw new RangeError(`size mismatch: ${aRows}x${aCols} != ${bRows}x${bCols}`);
+
+		const M = new Array(aRows);
+		for (let r = 0; r < aRows; ++r)
+		{
+			M[r] = new Array(bCols);
+			for (let c = 0; c < bCols; ++c)
+			{
+				M[r][c] = A[r][c] - B[r][c];
+			}
+		}
+		return M;
+	};
+
+	static transpose(M)
+	{
+		const rows = M.length, cols = M[0].length;
+		const T = [];
+		for (let j = 0; j < cols; j++) T[j] = Array(rows);
+		for (let i = 0; i < rows; i++)
+		{
+			for (let j = 0; j < cols; j++)
+			{
+				T[j][i] = M[i][j];
+			}
+		}
+		return T;
+	};
+
+
+	static dot(A, B)
+	{
+		const aRows = A.length,
+			  aCols = A[0].length,
+			  bRows = B.length,
+			  bCols = B[0].length;
+
+		if (aCols !== bRows) throw new RangeError(`size mismatch: ${aCols} != ${bRows}`);
+
+		const M = new Array(aRows);  // initialize array of rows
+
+		for (let r = 0; r < aRows; ++r)
+		{
+			M[r] = new Array(bCols); // initialize the current row
+			for (let c = 0; c < bCols; ++c)
+			{
+				M[r][c] = 0;            // initialize the current cell
+				for (let i = 0; i < aCols; ++i)
+				{
+					M[r][c] += A[r][i] * B[i][c];
+				}
+			}
+		}
+		return M;
+	};
+
+
+	static determinant(M)
+	{
+		// Function to get the determinant of a matrix
+
+		const n   = M.length;
+		const mat = M.map( (row) => row.slice() );
+
+		let det = 1;
+		let total = 1;
+
+		// Temporary array for storing row
+		const temp = new Array(n + 1).fill(0);
+
+		// Loop for traversing the diagonal elements
+		for (let i = 0; i < n; i++)
+		{
+			let index = i;
+
+			// Finding the index which has a non-zero value
+			while (index < n && mat[index][i] === 0)
+			{
+				index++;
+			}
+			if (index === n)
+			{
+				continue; // The determinant of the matrix is zero
+			}
+			if (index !== i)
+			{
+
+				// Swapping the diagonal element row and index row
+				for (let j = 0; j < n; j++)
+				{
+					[mat[index][j], mat[i][j]] = [mat[i][j], mat[index][j]];
+				}
+
+				// Determinant sign changes when we shift rows
+				det *= Math.pow(-1, index - i);
+			}
+
+			// Storing the values of diagonal row elements
+			for (let j = 0; j < n; j++)
+			{
+				temp[j] = mat[i][j];
+			}
+
+			// Traversing every row below the diagonal element
+			for (let j = i + 1; j < n; j++)
+			{
+				const num1 = temp[i]; // Value of diagonal element
+				const num2 = mat[j][i]; // Value of next row element
+
+				// Traversing every column of row and multiplying
+				// to every row
+				for (let k = 0; k < n; k++)
+				{
+					// Making the diagonal element and next row
+					// element equal
+					mat[j][k] = (num1 * mat[j][k]) - (num2 * temp[k]);
+				}
+				total *= num1;
+			}
+		}
+
+		// Multiplying the diagonal elements to get determinant
+		for (let i = 0; i < n; i++)
+		{
+			det *= mat[i][i];
+		}
+
+		return (det / total); // Det(kA)/k = Det(A);
+	};
+
+}
+

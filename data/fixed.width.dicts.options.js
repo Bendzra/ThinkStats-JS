@@ -19,7 +19,10 @@ var _dict_2006_2010_FemPreg = {
 		"birthord"   	: true,	// Birth order
 		"birthwgt_lb1"	: true,	// BD-3 Birthweight in Pounds - 1st baby from this pregnancy
 		"birthwgt_oz1"	: true,	// BD-3 Birthweight in Ounces - 1st baby from this pregnancy
-		"agepreg"    	: true 	// Age at pregnancy outcome
+		"agepreg"    	: true,	// Age at pregnancy outcome
+		"race"          : true, // Race
+		"nbrnaliv"      : true, // BC-2 Number of babies born alive from this pregnancy
+		"bfeedwks"      : true  // Duration of breastfeeding in weeks
 	},
 	columns: {
 		caseid:        {id: 1, start: 1, width: 5, type: "long", comment: "Case identification number"},
@@ -701,7 +704,9 @@ var _dict_2002FemResp = {
 		"cmbirth"    : true,	// CENTURY MONTH OF R'S BIRTH
 		"cmintvw"    : true,	// CENTURY MONTH OF INTERVIEW DATE
 		"cmmarrhx"   : true,	// CM FOR DATE OF 1ST MARRIAGE
-		"evrmarry"   : true		// WHETHER R WAS EVER MARRIED
+		"evrmarry"   : true,	// WHETHER R WAS EVER MARRIED
+		"race"       : true,    // RACE OF RESPONDENT
+		"paydu"      : true     // IB-10 CURRENT LIVING QUARTERS OWNED/RENTED, ETC.
 	},
 	columns: {
 		caseid:        {id:   1, start:  1, width: 12, type: "str12", comment: "RESPONDENT ID NUMBER"},
@@ -3797,7 +3802,7 @@ var _dict_2002FemResp = {
 //////////////////
 
 var _dict_2002FemPreg = {
-	name: "2002FemResp",
+	name: "2002FemPreg",
 	prefix: "nsfg_",
 	datFileName: "D:\\MyProjects\\Scripts\\Python\\Think Stats\\data\\NSFG\\2002FemPreg.dat",
 	logFileName: "df.2002FemPreg.json",
@@ -3811,7 +3816,11 @@ var _dict_2002FemPreg = {
 		"birthwgt_lb": true,	// BD-3 BIRTHWEIGHT IN POUNDS - 1ST BABY FROM THIS PREGNANCY
 		"birthwgt_oz": true,	// BD-3 BIRTHWEIGHT IN OUNCES - 1ST BABY FROM THIS PREGNANCY
 		"agepreg"    : true,	// AGE AT PREGNANCY OUTCOME
-		"finalwgt"   : true		// FINAL POST-STRATIFIED AND ADJUSTED WEIGHT
+		"finalwgt"   : true,	// FINAL POST-STRATIFIED AND ADJUSTED WEIGHT
+		"babysex"    : true,    // BD-2 SEX OF 1ST LIVEBORN BABY FROM THIS PREGNANCY
+		"race"       : true,    // Race
+		"nbrnaliv"   : true,    // BC-2 Number of babies born alive from this pregnancy
+		"bfeedwks"   : true     // DURATION OF BREASTFEEDING IN WEEKS
 	},
 	columns: {
 		caseid:        {id:  1, start: 1, width: 12, type: "str12", comment: "RESPONDENT ID NUMBER"},

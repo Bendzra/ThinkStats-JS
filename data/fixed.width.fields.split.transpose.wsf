@@ -4,7 +4,7 @@
 
 	// ------------ Input Options ------------ //
 
-	var db = _dict_2006_2010_FemPreg; // a dict from "fixed.width.dicts.options.js"
+	var db = _dict_Apr25_27thAn_set1; // a dict from "fixed.width.dicts.options.js"
 
 	var filter = true;        // to use db.write "white list"
 
@@ -85,6 +85,7 @@
 		var column = [];
 		var name = col;
 		var type = db.columns[col].type;
+		var comm = db.columns[col].comment;
 		var isStr = (type.indexOf("str") != -1);
 		var iLine = -1;
 
@@ -107,7 +108,7 @@
 
 			column.push(d);
 		}
-		fLog.WriteLine( "\t\'" + name + "': {type: \""+ type + "\", data: [" + column + "]},") ;
+		fLog.WriteLine( "\t\'" + name + "': {type: \"" + type + "\", stands_for: \"" + comm + "\", data: [" + column + "]},") ;
 		i++;
 
 	}
